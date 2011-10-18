@@ -10,6 +10,24 @@ require "evented-queue"
 class EventedQueue::Recurring < EventedQueue
   
     ##
+    # Holds scheduling routine.
+    # @return [Proc]
+    #
+    
+    attr_accessor :scheduler
+    @scheduler
+    
+    ##
+    # Constructor.
+    # @param [Proc] &scheduler  which indicates how to schedule recurring
+    #
+    
+    def initialize(stack = UnifiedQueues::Single::new(Array), &scheduler)
+        super(stack)
+        @scheduler = scheduler
+    end
+     
+    ##
     # Pushes value out of the queue.
     #
     # @return [Object] value from the queue
@@ -17,12 +35,19 @@ class EventedQueue::Recurring < EventedQueue
     #
 
     def pop(&block)
-        return super do |result|
-            if not block.nil?
+        if self.empty?
+            result = super(&block)
+        else
+            result = super(&block)
+            
+            if @scheduler.nil?
                 self.pop(&block)
-                yield result
+            else
+                @scheduler.call(Proc::new { self.pop(&block) })
             end
         end
+        
+        return result
     end
     
 end
