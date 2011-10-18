@@ -12,7 +12,9 @@ class AbstractEventedQueue
   
     ##
     # Pushes value into the queue.
-    # @param [Object]
+    #
+    # @param value [Object]  object to push
+    # @abstract
     #
     
     def push(value, &block)
@@ -21,7 +23,9 @@ class AbstractEventedQueue
     
     ##
     # Pushes value out of the queue.
-    # @yield [Object]
+    #
+    # @yield [Object]  an object from the queue
+    # @abstract
     #
     
     def pop(&block)
@@ -31,8 +35,9 @@ class AbstractEventedQueue
     ##
     # Indicates length of the queue.
     #
-    # @return [Integer]
-    # @yield [Integer]
+    # @return [Integer]  queue length
+    # @yield [Integer]  queue length
+    # @abstract
     #
     
     def length(&block)
@@ -41,7 +46,10 @@ class AbstractEventedQueue
     
     ##
     # Indicates queue is empty.
+    #
     # @return [Boolean] +true+ it it is, +false+ otherwise
+    # @yield [Boolean] +true+ it it is, +false+ otherwise
+    # @abstract
     #
     
     def empty?(&block)
@@ -50,6 +58,9 @@ class AbstractEventedQueue
     
     ##
     # Clears the queue.
+    #
+    # @yield [nil]
+    # @abstract
     #
     
     def clear(&block)
