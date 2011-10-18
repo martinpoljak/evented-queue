@@ -5,255 +5,107 @@
 $:.push("./lib")
 $:.unshift("./lib")
 
-require "unified-queues"
+require "evented-queue"
 require "riot"
   
-context "Single: Array (from Ruby STL)" do
+context "EventedQueue" do
     setup do
-        UnifiedQueues::Single::new(Array)
+        EventedQueue::new
     end
     
-    asserts("#clear!") do
-        initial = topic.empty?
+    asserts("#push") do
+        done = false
         topic.push(:foo)
-        topic.clear!
-        after = topic.empty?
-        initial and after
-    end
-    asserts("#empty?") do
-        initial = topic.empty?
-        topic.push(:foo)
-        after = topic.empty?
-        topic.pop
-        initial and not after
-    end
-    asserts("#length") do
-        initial = topic.length
-        topic.push(:foo)
-        after = topic.length
-        topic.pop
-        initial == 0 and after == 1
+        topic.pop do |v| 
+            done = v == :foo
+        end
+        done
     end
     asserts("#pop") do
+        d1 = false
+        d2 = false
+        
         topic.push(:foo)
+        topic.pop do |v| 
+            d1 = v == :foo
+        end
+        topic.pop do |v| 
+            d2 = v == :bar
+        end
         topic.push(:bar)
-        topic.pop == :foo and topic.pop == :bar
+        
+        d1 and d2
     end
-    asserts("#push") do
+    asserts("#length") do
         topic.push(:foo)
-        topic.pop == :foo
+        topic.pop
+        d1 = topic.length == 0
+        topic.push(:foo)
+        d2 = topic.length == 1
+        
+        d1 and d2
+    end
+    asserts("#empty?") do
+        topic.clear!
+        topic.push(:foo)
+        d1 = not(topic.empty?)
+        topic.pop
+        d2 = topic.empty?
+        
+        d1 and d2
+    end
+    asserts("#clear!") do
+        topic.push(:foo)
+        topic.clear!
+        topic.empty?
     end
 end
 
-context "Single: Queue (from Ruby STL)" do
-    setup do
-        require "thread"
-        UnifiedQueues::Single::new(Queue)
-    end
-    
-    asserts("#clear!") do
-        initial = topic.empty?
+context "EventedQueue::Recurring" do
+    asserts("#push") do
+        topic = EventedQueue::Recurring::new
+        done = false
         topic.push(:foo)
-        topic.clear!
-        #after = topic.empty?
-        #initial and after
-    end
-    asserts("#empty?") do
-        initial = topic.empty?
-        topic.push(:foo)
-        after = topic.empty?
-        topic.pop
-        initial and not after
-    end
-    asserts("#length") do
-        initial = topic.length
-        topic.push(:foo)
-        after = topic.length
-        topic.pop
-        initial == 0 and after == 1
+        topic.pop do |v| 
+            done = v == :foo
+        end
+        done
     end
     asserts("#pop") do
+        topic = EventedQueue::Recurring::new
+        result = [ ]
         topic.push(:foo)
+        topic.pop do |v| 
+            result << v
+        end
         topic.push(:bar)
-        topic.pop == :foo and topic.pop == :bar
-    end
-    asserts("#push") do
-        topic.push(:foo)
-        topic.pop == :foo
-    end
-end
-
-context "Single: Containers::Heap (from 'algorithms')" do
-    setup do
-        require "algorithms"
-        UnifiedQueues::Single::new(Containers::Heap)
-    end
-    
-    asserts("#clear!") do
-        initial = topic.empty?
-        topic.push(:foo)
-        topic.clear!
-        after = topic.empty?
-        initial and after
-    end
-    asserts("#empty?") do
-        initial = topic.empty?
-        topic.push(:foo)
-        after = topic.empty?
-        topic.pop
-        initial and not after
+        result == [:foo, :bar]
     end
     asserts("#length") do
-        initial = topic.length
+        topic = EventedQueue::Recurring::new
         topic.push(:foo)
-        after = topic.length
         topic.pop
-        initial == 0 and after == 1
-    end
-    asserts("#pop") do
-        topic.push(:foo, 2)
-        topic.push(:bar, 1)
-        topic.pop == :bar and topic.pop == :foo
-    end
-    asserts("#push") do
+        d1 = topic.length == 0
         topic.push(:foo)
-        topic.pop == :foo
-    end
-end
-
-context "Single: Depq (from 'depq')" do
-    setup do
-        require "depq"
-        UnifiedQueues::Single::new(Depq)
-    end
-    
-    asserts("#clear!") do
-        initial = topic.empty?
-        topic.push(:foo)
-        topic.clear!
-        after = topic.empty?
-        initial and after
+        d2 = topic.length == 1
+        
+        d1 and d2
     end
     asserts("#empty?") do
-        initial = topic.empty?
+        topic = EventedQueue::Recurring::new
+        topic.clear!
         topic.push(:foo)
-        after = topic.empty?
+        d1 = not(topic.empty?)
         topic.pop
-        initial and not after
+        d2 = topic.empty?
+        
+        d1 and d2
     end
-    asserts("#length") do
-        initial = topic.length
-        topic.push(:foo)
-        after = topic.length
-        topic.pop
-        initial == 0 and after == 1
-    end
-    asserts("#pop") do
-        topic.push(:foo, 2)
-        topic.push(:bar, 1)
-        topic.pop == :bar and topic.pop == :foo
-    end
-    asserts("#push") do
-        topic.push(:foo)
-        topic.pop == :foo
-    end
-end
-
-context "Single: CPriorityQueue (from 'priority_queue')" do
-    setup do
-        require "priority_queue/c_priority_queue"
-        UnifiedQueues::Single::new(CPriorityQueue)
-    end
-    
     asserts("#clear!") do
-        initial = topic.empty?
+        topic = EventedQueue::Recurring::new
         topic.push(:foo)
         topic.clear!
-        after = topic.empty?
-        initial and after
-    end
-    asserts("#empty?") do
-        initial = topic.empty?
-        topic.push(:foo)
-        after = topic.empty?
-        topic.pop
-        initial and not after
-    end
-    asserts("#length") do
-        initial = topic.length
-        topic.push(:foo)
-        after = topic.length
-        topic.pop
-        initial == 0 and after == 1
-    end
-    asserts("#pop") do
-        topic.push(:foo, 2)
-        topic.push(:bar, 1)
-        topic.pop == :bar and topic.pop == :foo
-    end
-    asserts("#push") do
-        topic.push(:foo)
-        topic.pop == :foo
-    end
-end
-
-context "Single: PoorPriorityQueue (from 'priority_queue')" do
-    setup do
-        require "priority_queue/poor_priority_queue"
-        UnifiedQueues::Single::new(PoorPriorityQueue)
-    end
-    
-    asserts("#clear!") do
-        topic.push(:foo)
-        topic.clear!
-        topic.pop.nil?
-    end
-    asserts("#pop") do
-        topic.push(:foo, 2)
-        topic.push(:bar, 1)
-        topic.pop == :bar and topic.pop == :foo
-    end
-    asserts("#push") do
-        topic.push(:foo)
-        topic.pop == :foo
-    end
-end
-
-context "Single: RubyPriorityQueue (from 'priority_queue')" do
-    setup do
-        require "priority_queue/ruby_priority_queue"
-        UnifiedQueues::Single::new(RubyPriorityQueue)
-    end
-    
-    asserts("#clear!") do
-        initial = topic.empty?
-        topic.push(:foo)
-        topic.clear!
-        after = topic.empty?
-        initial and after
-    end
-    asserts("#empty?") do
-        initial = topic.empty?
-        topic.push(:foo)
-        after = topic.empty?
-        topic.pop
-        initial and not after
-    end
-    asserts("#length") do
-        initial = topic.length
-        topic.push(:foo)
-        after = topic.length
-        topic.pop
-        initial == 0 and after == 1
-    end
-    asserts("#pop") do
-        topic.push(:foo, 2)
-        topic.push(:bar, 1)
-        topic.pop == :bar and topic.pop == :foo
-    end
-    asserts("#push") do
-        topic.push(:foo)
-        topic.pop == :foo
+        topic.empty?
     end
 end
 
