@@ -15,10 +15,10 @@ require 'jeweler'
 
 Jeweler::Tasks.new do |gem|
   # gem is a Gem::Specification... see http://docs.rubygems.org/read/chapter/20 for more options
-  gem.name = "unified-queues"
-  gem.homepage = "http://github.com/martinkozak/unified-locker"
+  gem.name = "evented-queue"
+  gem.homepage = "http://github.com/martinkozak/evented-queue"
   gem.license = "MIT"
-  gem.summary = 'Unifies many queue implementations under the single interface. Includes both single queue libraries and multiple queue libraries.'
+  gem.summary = 'Provides queue driven by callbacks so suitable for asynchronous processing environments and its recurring variant for request distribution to more clients or emulating of server behaviour.'
   gem.email = "martinkozak@martinkozak.net"
   gem.authors = ["Martin Kozák"]
   # Include your dependencies below. Runtime dependencies are required when using your gem,
