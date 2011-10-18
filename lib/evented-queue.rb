@@ -59,7 +59,7 @@ class EventedQueue < AbstractEventedQueue
     ##
     # Pushes value out of the queue.
     #
-    # @yield [Object] value from the queue
+    # @return [Object] value from the queue
     # @yield [Object] value from the queue
     #
     
