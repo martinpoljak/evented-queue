@@ -30,7 +30,7 @@ And recurring queue example:
 
     require "evented-queue/recurring"
     
-    queue = EventedQueue::new(Array)
+    queue = EventedQueue::Recurring::new(Array)
     queue.push(:foo)
     
     queue.pop do |item|     # :foo will be written out now
