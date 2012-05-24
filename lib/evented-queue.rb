@@ -73,6 +73,8 @@ class EventedQueue < AbstractEventedQueue
         end
     end
     
+    alias :pop! :pop
+    
     ##
     # Indicates length of the queue.
     #

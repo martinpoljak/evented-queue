@@ -1,37 +1,45 @@
-Callback Locker
-===============
+Ruby Evented Queue
+==================
 
-"Locker" is lockable box for equipment -- at this case box for 
-collecting the callbacks (in ites locked state) and running them 
-after unlocking. So, in fact, it serves as some kind of callback 
-semaphore or mutex. 
+**evented-queue** simply wraps non-evented queue to an evented 
+interface. It directly uses the [Unified Queues][1] gem which means, 
+wide spectrum of queues can be converted to the evented queues. 
+Advantage of the evented queue is, they can be *recurring*, so 
+can serve as de-facto permanent provider of the events.
 
-Some trivial example:
+An example:
 
-    require "callback-locker"
-    locker = CallbackLocker::new
+    require "evented-queue"
+    require "depq"      # will serve as example here
     
-    foo = nil
-    locker.synchronize do
-        foo = "bar"
+    queue = EventedQueue::new(Depq)
+    queue.push(:foo)
+    
+    queue.pop do |item|
+        item    # will contain :foo
     end
     
-    # ^^^ locker is unlocked, so #synchronize will execute callback
-    #     immediately 
+    queue.push(:bar)
     
-    foo = nil
-    locker.lock!
-    locker.synchronize do
-        foo = "1"
-    end
-    locker.synchronize do
-        foo << "2"
-    end
-    locker.unlock!
+    queue.pop do |item|
+        item    # will contain :bar
+    end 
+
     
-    # ^^^ locker is locked, so callbacks are stacked and executed
-    #     immediately after the #unlock! method is call, so foo
-    #     will contain "12"
+And recurring queue example:
+
+    require "evented-queue/recurring"
+    
+    queue = EventedQueue::new(Array)
+    queue.push(:foo)
+    
+    queue.pop do |item|     # :foo will be written out now
+        p item
+    end
+    
+    queue.push(:bar)        # :bar will be written out now
+    queue.push(:delta)      # :delta will be written out now
+
 
 Contributing
 ------------
@@ -47,9 +55,9 @@ Contributing
 Copyright
 ---------
 
-Copyright &copy; 2011 [Martin Kozák][10]. See `LICENSE.txt` for
+Copyright &copy; 2011 - 2012 [Martin Kozák][10]. See `LICENSE.txt` for
 further details.
 
-[8]: http://rubyeventmachine.com/
-[9]: http://github.com/martinkozak/callback-adapter/issues
+[1]: http://github.com/martinkozak/unified-queues
+[9]: http://github.com/martinkozak/evented-queue/issues
 [10]: http://www.martinkozak.net/
